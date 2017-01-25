@@ -4,6 +4,20 @@ metadata:
   labels:
     run: hubot
   name: hubot
+  annotations:
+    pod.beta.kubernetes.io/init-containers: '[
+        {
+            "name": "init",
+            "image": "node",
+            "command": ["npm", "install"],
+            "volumeMounts": [
+                {
+                    "name": "config",
+                    "mountPath": "/hubot"
+                }
+            ]
+        }
+    ]'
 spec:
   replicas: 1
   selector:
@@ -16,6 +30,10 @@ spec:
       labels:
         run: hubot
     spec:
+      volumes:
+        - name: config
+          configMap:
+            name: hubot
       containers:
       - env:
         - name: GOOGLE_API_KEY
@@ -38,3 +56,6 @@ spec:
         image: quay.io/nordstrom/hubot
         imagePullPolicy: Always
         name: hubot
+        volumeMounts:
+          - name: config
+            mountPath: /hubot
