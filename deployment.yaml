@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: hubot
+  name: hubot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: hubot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        run: hubot
+    spec:
+      containers:
+      - env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: GOOGLE_API_KEY
+              name: hubot
+        - name: GOOGLE_CUSTOM_SEARCH
+          valueFrom:
+            secretKeyRef:
+              key: GOOGLE_CUSTOM_SEARCH
+              name: hubot
+        - name: HUBOT_SLACK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: HUBOT_SLACK_TOKEN
+              name: hubot
+        - name: MAX_SEARCH_RESULTS
+          value: "1"
+        image: quay.io/nordstrom/hubot
+        imagePullPolicy: Always
+        name: hubot

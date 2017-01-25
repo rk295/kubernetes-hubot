@@ -1,8 +1,6 @@
 FROM node
 
-COPY package.json .
-RUN npm install
+RUN mkdir hubot
+COPY bin/* bin/
 
-COPY . .
-
-CMD ["bin/hubot", "--adapter", "slack"]
+CMD ["hubot", "--adapter", "slack"]
