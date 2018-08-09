@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if ! kubectl get configmap hubot --no-headers 2>&1 | grep 'not found' > /dev/null 2>&1 ; then
+    echo "INFO: Found configmap, deleting old one."
+    kubectl delete configmap hubot
+fi
+
+echo "INFO: Creating new config map"
+kubectl create configmap hubot --from-file=hubot/
+
+if ! kubectl get pods -l run=hubot --no-headers 2>&1 | grep 'No resources found.' > /dev/null 2>&1 ; then
+    echo "INFO: Found a pod, killing it"
+    kubectl delete pods -l run=hubot
+fi
