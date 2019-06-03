@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# Quick script to automate the deployment.
+#
+# Save your slack token to the file .slack-token - git is configured to ignore
+# this file so it won't get committed.
+#
+# IMPORTANT: This deploys into the namespace your current context points to.
+#
+set -euo pipefail
+IFS=$'\n\t'
+
+# Create the config map from the files in hubot/
+if [[ -d "hubot" ]]; then
+  echo "INFO: Found hubot config dir, creating configmaps"
+  kubectl create configmap hubot --from-file=hubot/
+else
+  echo "ERROR: Can't find local hubot config dir, Can't continue"
+  exit 1
+fi
+
+# Read the slack token
+if [[ -e ".slack-token" ]]; then
+  echo "INFO: Creating slack token secret"
+  HUBOT_SLACK_TOKEN="$(cat .slack-token)"
+  kubectl create secret generic hubot --from-literal=HUBOT_SLACK_TOKEN="$HUBOT_SLACK_TOKEN"
+else
+  echo "ERROR: Can't find local .slack-token. Can't continue"
+  exit 1
+fi
+
+if [[ -e "deployment.yaml" ]]; then
+  echo "INFO: Creating the deployment"
+  kubectl apply -f deployment.yaml
+else
+  echo "ERROR: Can't find the deployment.yaml. Can't continue"
+  exit 1
+fi
